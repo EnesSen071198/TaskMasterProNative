@@ -19,11 +19,12 @@ import {
   ProgressBar,
   Searchbar,
   Divider,
+  TextInput,
 } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { toggleTodo, addTodo, deleteTodo } from '../store/slices/todosSlice';
-import { Todo } from '../types';
+import { Todo, TaskCategory } from '../types';
 
 const TasksScreen = () => {
   const dispatch = useDispatch();
@@ -33,6 +34,11 @@ const TasksScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, completed, pending
   const [filterPriority, setFilterPriority] = useState('all'); // all, high, medium, low
+  
+  // Görev ekleme form states
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high'>('medium');
 
   // İstatistikler
   const completedTodos = todos.filter(todo => todo.completed);
@@ -62,6 +68,49 @@ const TasksScreen = () => {
 
   const handleToggleTodo = (id: string) => {
     dispatch(toggleTodo(id));
+  };
+
+  const handleAddTodo = () => {
+    if (newTaskTitle.trim() === '') {
+      Alert.alert('Hata', 'Görev başlığı boş olamaz!');
+      return;
+    }
+
+    // Default category oluştur
+    const defaultCategory: TaskCategory = {
+      id: 'personal',
+      name: 'Kişisel',
+      description: 'Kişisel görevler',
+      color: '#33FF57',
+      icon: 'account',
+      isDefault: true,
+      allowsSubcategories: false,
+    };
+
+    const newTodo: Todo = {
+      id: Date.now().toString(),
+      title: newTaskTitle.trim(),
+      description: newTaskDescription.trim(),
+      completed: false,
+      priority: newTaskPriority,
+      category: defaultCategory,
+      labels: [],
+      subTasks: [],
+      order: 0,
+      attachments: [],
+      status: 'not_started',
+      progress: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    dispatch(addTodo(newTodo));
+    
+    // Form'u sıfırla
+    setNewTaskTitle('');
+    setNewTaskDescription('');
+    setNewTaskPriority('medium');
+    setModalVisible(false);
   };
 
   const handleDeleteTodo = (id: string) => {
@@ -335,18 +384,67 @@ const TasksScreen = () => {
           contentContainerStyle={styles.modal}
         >
           <Text variant="titleLarge" style={styles.modalTitle}>
-            Yeni Görev
+            Yeni Görev Ekle
           </Text>
-          <Text variant="bodyMedium">
-            Görev ekleme formu burada olacak
-          </Text>
-          <Button
-            mode="contained"
-            onPress={() => setModalVisible(false)}
-            style={styles.modalButton}
-          >
-            Kapat
-          </Button>
+          
+          <TextInput
+            label="Görev Başlığı"
+            value={newTaskTitle}
+            onChangeText={setNewTaskTitle}
+            style={styles.textInput}
+            mode="outlined"
+          />
+          
+          <TextInput
+            label="Açıklama (İsteğe bağlı)"
+            value={newTaskDescription}
+            onChangeText={setNewTaskDescription}
+            style={styles.textInput}
+            mode="outlined"
+            multiline
+            numberOfLines={3}
+          />
+          
+          <View style={styles.priorityContainer}>
+            <Text variant="bodyLarge" style={styles.priorityLabel}>
+              Öncelik Seviyesi:
+            </Text>
+            <View style={styles.priorityButtons}>
+              {(['low', 'medium', 'high'] as const).map((priority) => (
+                <Button
+                  key={priority}
+                  mode={newTaskPriority === priority ? 'contained' : 'outlined'}
+                  onPress={() => setNewTaskPriority(priority)}
+                  style={styles.priorityButton}
+                  compact
+                >
+                  {priority === 'low' ? 'Düşük' : priority === 'medium' ? 'Orta' : 'Yüksek'}
+                </Button>
+              ))}
+            </View>
+          </View>
+          
+          <View style={styles.modalButtons}>
+            <Button
+              mode="outlined"
+              onPress={() => {
+                setNewTaskTitle('');
+                setNewTaskDescription('');
+                setNewTaskPriority('medium');
+                setModalVisible(false);
+              }}
+              style={styles.modalButton}
+            >
+              İptal
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleAddTodo}
+              style={styles.modalButton}
+            >
+              Ekle
+            </Button>
+          </View>
         </Modal>
       </Portal>
     </View>
@@ -523,6 +621,31 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     marginTop: 16,
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  textInput: {
+    marginBottom: 16,
+  },
+  priorityContainer: {
+    marginBottom: 16,
+  },
+  priorityLabel: {
+    marginBottom: 8,
+    fontWeight: 'bold',
+  },
+  priorityButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  priorityButton: {
+    flex: 1,
+    marginHorizontal: 4,
   },
 });
 

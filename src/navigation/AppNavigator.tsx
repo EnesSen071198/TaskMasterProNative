@@ -2,8 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Text } from 'react-native';
 import { ThemeProvider, useTheme } from '../theme';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Screens
 import TasksScreen from '../screens/TasksScreen';
@@ -33,33 +33,33 @@ const TabNavigator = () => {
           borderTopColor: colors.outline,
         },
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: string;
+          let iconEmoji: string;
 
           switch (route.name) {
             case 'Tasks':
-              iconName = focused ? 'clipboard-check' : 'clipboard-check-outline';
+              iconEmoji = '✅';
               break;
             case 'Notes':
-              iconName = focused ? 'note' : 'note-outline';
+              iconEmoji = '📝';
               break;
             case 'Calendar':
-              iconName = focused ? 'calendar' : 'calendar-outline';
+              iconEmoji = '📅';
               break;
             case 'Pomodoro':
-              iconName = focused ? 'timer' : 'timer-outline';
+              iconEmoji = '🍅';
               break;
             case 'Progress':
-              iconName = focused ? 'chart-line' : 'chart-line-variant';
+              iconEmoji = '📊';
               break;
             case 'Profile':
-              iconName = focused ? 'account' : 'account-outline';
+              iconEmoji = '👤';
               break;
             default:
-              iconName = 'help';
+              iconEmoji = '❓';
               break;
           }
 
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+          return <Text style={{ fontSize: size * 0.8, color }}>{iconEmoji}</Text>;
         },
       })}>
       <Tab.Screen 
