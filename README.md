@@ -1,97 +1,197 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 📱 TaskMaster Pro Native
 
-# Getting Started
+React Native ile geliştirilmiş native mobil uygulama.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## ✨ Özellikler
 
-## Step 1: Start Metro
+- 🎯 **Native Görev Yönetimi** - iOS ve Android için optimize
+- 📝 **Mobil Not Alma** - Touch-friendly arayüz
+- 🍅 **Pomodoro Timer** - Native timer ve bildirimler
+- 📊 **İlerleme Takibi** - Native charts ve istatistikler
+- 🔄 **AsyncStorage** - Offline veri depolama
+- 🎨 **Material Design** - React Native Paper UI
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 🚀 Kurulum
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Ön Gereksinimler
 
-```sh
-# Using npm
-npm start
+1. **Node.js 18+**
+2. **React Native CLI**
+3. **Android Studio** (Android için)
+4. **Xcode** (iOS için)
 
-# OR using Yarn
-yarn start
+### Kurulum Adımları
+
+1. **Bağımlılıkları yükleyin:**
+```bash
+cd TaskMasterProNative
+npm install
 ```
 
-## Step 2: Build and run your app
+2. **iOS için (Mac):**
+```bash
+cd ios && pod install && cd ..
+npx react-native run-ios
+```
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+3. **Android için:**
+```bash
+npx react-native run-android
+```
+
+## 📱 Platform Gereksinimleri
 
 ### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
+- **Min SDK:** 21 (Android 5.0)
+- **Target SDK:** 34 (Android 14)
+- **Java:** 17+
+- **Gradle:** 8.0+
 
 ### iOS
+- **Min iOS:** 13.0
+- **Xcode:** 14+
+- **Swift:** 5.0+
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## 🛠️ Kullanılan Teknolojiler
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+### Core
+- **React Native 0.80.2**
+- **TypeScript**
+- **React 19**
 
-```sh
-bundle install
+### State Management
+- **Redux Toolkit**
+- **AsyncStorage**
+
+### UI/UX
+- **React Native Paper**
+- **React Navigation 6**
+- **Vector Icons**
+
+### Native Features
+- **Safe Area Context**
+- **Gesture Handler**
+- **AsyncStorage**
+
+## 📁 Proje Yapısı
+
+```
+src/
+├── components/         # Reusable components
+├── screens/           # App screens
+│   ├── TasksScreen.tsx
+│   ├── NotesScreen.tsx
+│   ├── CalendarScreen.tsx
+│   ├── PomodoroScreen.tsx
+│   ├── ProgressScreen.tsx
+│   └── ProfileScreen.tsx
+├── navigation/        # Navigation setup
+├── store/            # Redux store
+│   └── slices/       # Redux slices
+├── types/            # TypeScript types
+└── utils/            # Utility functions
+    └── storage.ts    # AsyncStorage helpers
 ```
 
-Then, and every time you update your native dependencies, run:
+## 🎮 Demo Verileri
 
-```sh
-bundle exec pod install
+Uygulama ilk açılışta demo verilerle gelir:
+
+- ✅ **Sample Todo:** "TaskMaster Pro'ya hoş geldiniz!"
+- 📝 **Sample Note:** "İlk Notum"
+- 🏷️ **Categories:** Genel, İş, Kişisel, Alışveriş
+
+## 📊 Özellik Detayları
+
+### Görev Yönetimi
+- ✅ Touch-friendly task list
+- ✅ Swipe gestures
+- ✅ Priority indicators
+- ✅ Status management
+- ✅ Category filtering
+
+### Not Sistemi
+- ✅ Native text editor
+- ✅ Tag system
+- ✅ Search functionality
+- ✅ Grid/List view toggle
+
+### Pomodoro Timer
+- ✅ Native countdown timer
+- ✅ Background timer support
+- ✅ Sound notifications
+- ✅ Session tracking
+
+### İlerleme Takibi
+- ✅ Native progress bars
+- ✅ Statistics dashboard
+- ✅ Achievement tracking
+- ✅ Weekly/Monthly reports
+
+## 🔧 Development
+
+### Debug Mode
+```bash
+npx react-native start
+npx react-native run-android --mode debug
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+### Release Build
+```bash
+npx react-native run-android --mode release
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Debugging
+- **Flipper** - Native debugging
+- **Metro Bundler** - JS debugging
+- **React DevTools** - Component debugging
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 📱 Platform-Specific Features
 
-## Step 3: Modify your app
+### Android
+- ✅ Material Design 3
+- ✅ Android back button handling
+- ✅ Adaptive icons
+- ✅ Android notifications
 
-Now that you have successfully run the app, let's make changes!
+### iOS
+- ✅ iOS design guidelines
+- ✅ Safe area support
+- ✅ iOS-specific navigation
+- ✅ iOS notifications
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## 🚧 TODO Features
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+- [ ] Push notifications
+- [ ] Background sync
+- [ ] Widget support
+- [ ] Dark theme
+- [ ] Biometric authentication
+- [ ] Cloud sync
+- [ ] Export/Import data
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## 🐛 Troubleshooting
 
-## Congratulations! :tada:
+### Metro Bundler Issues
+```bash
+npx react-native start --reset-cache
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+### Android Build Issues
+```bash
+cd android && ./gradlew clean && cd ..
+```
 
-### Now what?
+### iOS Build Issues
+```bash
+cd ios && xcodebuild clean && cd ..
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## 📞 Support
 
-# Troubleshooting
+- **GitHub Issues:** [Report bugs](https://github.com/your-repo/issues)
+- **Email:** support@taskmaster.com
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**TaskMaster Pro Native** - Native mobil üretkenlik uygulaması! 🚀📱
