@@ -22,6 +22,8 @@ const CalendarScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [eventTitle, setEventTitle] = useState('');
   const [eventDescription, setEventDescription] = useState('');
+  const [viewMode, setViewMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // Takvim için işaretli tarihleri oluştur
   const getMarkedDates = () => {
@@ -83,20 +85,100 @@ const CalendarScreen = () => {
               📅 Takvim Görünümü
             </Text>
             
-            {/* Basit tarih seçici */}
-            <View style={styles.dateSelector}>
-              <Text variant="bodyMedium" style={styles.dateLabel}>
-                Tarih Seç:
+            {/* Görünüm Modu Seçici */}
+            <View style={styles.viewSelector}>
+              <Button
+                mode={viewMode === 'daily' ? 'contained' : 'outlined'}
+                onPress={() => setViewMode('daily')}
+                style={styles.viewButton}
+                compact
+              >
+                Günlük
+              </Button>
+              <Button
+                mode={viewMode === 'weekly' ? 'contained' : 'outlined'}
+                onPress={() => setViewMode('weekly')}
+                style={styles.viewButton}
+                compact
+              >
+                Haftalık
+              </Button>
+              <Button
+                mode={viewMode === 'monthly' ? 'contained' : 'outlined'}
+                onPress={() => setViewMode('monthly')}
+                style={styles.viewButton}
+                compact
+              >
+                Aylık
+              </Button>
+            </View>
+
+            {/* Tarih Navigasyonu */}
+            <View style={styles.dateNavigation}>
+              <Button
+                mode="text"
+                compact
+                onPress={() => {
+                  const newDate = new Date(currentDate);
+                  if (viewMode === 'daily') {
+                    newDate.setDate(newDate.getDate() - 1);
+                  } else if (viewMode === 'weekly') {
+                    newDate.setDate(newDate.getDate() - 7);
+                  } else {
+                    newDate.setMonth(newDate.getMonth() - 1);
+                  }
+                  setCurrentDate(newDate);
+                  setSelectedDate(newDate.toISOString().split('T')[0]);
+                }}
+              >
+                ◀️
+              </Button>
+              <Text variant="titleMedium" style={styles.currentDateText}>
+                {viewMode === 'daily' 
+                  ? currentDate.toLocaleDateString('tr-TR', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })
+                  : viewMode === 'weekly'
+                  ? `${currentDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} - Hafta`
+                  : currentDate.toLocaleDateString('tr-TR', { 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })
+                }
               </Text>
+              <Button
+                mode="text"
+                compact
+                onPress={() => {
+                  const newDate = new Date(currentDate);
+                  if (viewMode === 'daily') {
+                    newDate.setDate(newDate.getDate() + 1);
+                  } else if (viewMode === 'weekly') {
+                    newDate.setDate(newDate.getDate() + 7);
+                  } else {
+                    newDate.setMonth(newDate.getMonth() + 1);
+                  }
+                  setCurrentDate(newDate);
+                  setSelectedDate(newDate.toISOString().split('T')[0]);
+                }}
+              >
+                ▶️
+              </Button>
+            </View>
+            
+            {/* Bugüne Git Butonu */}
+            <View style={styles.todayButton}>
               <Button
                 mode="outlined"
                 onPress={() => {
-                  const today = new Date().toISOString().split('T')[0];
-                  setSelectedDate(today);
+                  const today = new Date();
+                  setCurrentDate(today);
+                  setSelectedDate(today.toISOString().split('T')[0]);
                 }}
-                style={styles.dateButton}
               >
-                {selectedDate || 'Bugün Seç'}
+                📅 Bugün
               </Button>
             </View>
             
@@ -127,6 +209,41 @@ const CalendarScreen = () => {
                 1 Hafta
               </Button>
             </View>
+
+            {/* Basit Takvim Grid */}
+            {viewMode === 'monthly' && (
+              <View style={styles.calendarGrid}>
+                <View style={styles.weekDaysHeader}>
+                  {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((day, index) => (
+                    <Text key={index} style={styles.weekDayText}>{day}</Text>
+                  ))}
+                </View>
+                <View style={styles.daysGrid}>
+                  {Array.from({length: 35}, (_, index) => {
+                    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                    const startDay = (startOfMonth.getDay() + 6) % 7; // Pazartesi'yi 0 yapma
+                    const dayNumber = index - startDay + 1;
+                    const isCurrentMonth = dayNumber > 0 && dayNumber <= new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+                    const dateStr = isCurrentMonth ? new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber).toISOString().split('T')[0] : '';
+                    const isSelected = dateStr === selectedDate;
+                    const hasTask = isCurrentMonth && getTasksForDate(dateStr).length > 0;
+
+                    return (
+                      <Button
+                        key={index}
+                        mode={isSelected ? 'contained' : 'text'}
+                        style={[styles.dayButton, hasTask && styles.dayWithTask]}
+                        compact
+                        onPress={() => isCurrentMonth && setSelectedDate(dateStr)}
+                        disabled={!isCurrentMonth}
+                      >
+                        {isCurrentMonth ? dayNumber.toString() : ''}
+                      </Button>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
           </Card.Content>
         </Card>
 
@@ -225,10 +342,9 @@ const CalendarScreen = () => {
 
       {/* Etkinlik Ekleme FAB */}
       <FAB
-        icon="plus"
         style={styles.fab}
         onPress={() => setModalVisible(true)}
-        label="Etkinlik Ekle"
+        label="➕ Etkinlik Ekle"
       />
 
       {/* Etkinlik Ekleme Modal */}
@@ -315,6 +431,62 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     minWidth: 150,
+  },
+  viewSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+  },
+  viewButton: {
+    minWidth: 80,
+  },
+  dateNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    padding: 8,
+  },
+  currentDateText: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  todayButton: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  calendarGrid: {
+    marginTop: 16,
+  },
+  weekDaysHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  weekDayText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+    textAlign: 'center',
+    width: 40,
+  },
+  daysGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dayButton: {
+    width: '14.28%',
+    minHeight: 40,
+    margin: 1,
+    borderRadius: 20,
+  },
+  dayWithTask: {
+    backgroundColor: '#E3F2FD',
   },
   quickDates: {
     flexDirection: 'row',

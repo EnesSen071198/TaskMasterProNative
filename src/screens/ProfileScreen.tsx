@@ -102,7 +102,7 @@ const ProfileScreen = () => {
           <List.Item
             title="Karanlık Tema"
             description="Gece modunu etkinleştir"
-            left={props => <List.Icon {...props} icon="theme-light-dark" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>🌙</Text>}
             right={() => (
               <Switch
                 value={isDarkMode}
@@ -116,7 +116,7 @@ const ProfileScreen = () => {
           <List.Item
             title="Bildirimler"
             description="Push bildirimlerini al"
-            left={props => <List.Icon {...props} icon="bell-outline" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>🔔</Text>}
             right={() => (
               <Switch
                 value={notifications}
@@ -130,7 +130,7 @@ const ProfileScreen = () => {
           <List.Item
             title="Otomatik Yedekleme"
             description="Verilerinizi otomatik yedekle"
-            left={props => <List.Icon {...props} icon="cloud-upload-outline" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>☁️</Text>}
             right={() => (
               <Switch
                 value={autoBackup}
@@ -151,8 +151,8 @@ const ProfileScreen = () => {
           <List.Item
             title="Profili Düzenle"
             description="Kişisel bilgilerinizi güncelleyin"
-            left={props => <List.Icon {...props} icon="account-edit" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>✏️</Text>}
+            right={() => <Text style={{fontSize: 24, marginRight: 16}}>▶️</Text>}
             onPress={() => {}}
           />
           
@@ -171,8 +171,8 @@ const ProfileScreen = () => {
           <List.Item
             title="Verileri Dışa Aktar"
             description="Tüm verilerinizi indirin"
-            left={props => <List.Icon {...props} icon="download" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>📥</Text>}
+            right={() => <Text style={{fontSize: 24, marginRight: 16}}>▶️</Text>}
             onPress={() => {}}
           />
         </Card.Content>
@@ -188,15 +188,15 @@ const ProfileScreen = () => {
           <List.Item
             title="Uygulama Versiyonu"
             description="v1.0.0"
-            left={props => <List.Icon {...props} icon="information-outline" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>ℹ️</Text>}
           />
           
           <Divider />
           
           <List.Item
             title="Gizlilik Politikası"
-            left={props => <List.Icon {...props} icon="shield-account" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>🔒</Text>}
+            right={() => <Text style={{fontSize: 24, marginRight: 16}}>▶️</Text>}
             onPress={() => {}}
           />
           
@@ -204,8 +204,8 @@ const ProfileScreen = () => {
           
           <List.Item
             title="Kullanım Koşulları"
-            left={props => <List.Icon {...props} icon="file-document-outline" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
+            left={() => <Text style={{fontSize: 24, marginLeft: 16}}>📄</Text>}
+            right={() => <Text style={{fontSize: 24, marginRight: 16}}>▶️</Text>}
             onPress={() => {}}
           />
         </Card.Content>
@@ -216,12 +216,11 @@ const ProfileScreen = () => {
         <Card.Content>
           <Button
             mode="outlined"
-            icon="logout"
             onPress={() => {}}
             style={styles.logoutButton}
             textColor="#F44336"
           >
-            Çıkış Yap
+            🚪 Çıkış Yap
           </Button>
         </Card.Content>
       </Card>

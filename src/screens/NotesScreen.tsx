@@ -15,10 +15,11 @@ import {
   Modal,
   Button,
   Searchbar,
+  TextInput,
 } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
-import { deleteNote } from '../store/slices/notesSlice';
+import { deleteNote, addNote, updateNote } from '../store/slices/notesSlice';
 import { Note } from '../types';
 
 const NotesScreen = () => {
@@ -27,6 +28,14 @@ const NotesScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  
+  // New note form state
+  const [newNote, setNewNote] = useState({
+    title: '',
+    content: '',
+    tags: [] as string[]
+  });
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -35,6 +44,58 @@ const NotesScreen = () => {
 
   const handleDeleteNote = (id: string) => {
     dispatch(deleteNote(id));
+  };
+
+  const handleAddNote = () => {
+    if (newNote.title.trim() === '') {
+      return;
+    }
+
+    const noteToAdd: Note = {
+      id: Date.now().toString(),
+      title: newNote.title.trim(),
+      content: newNote.content.trim(),
+      tags: newNote.tags,
+      order: notes.length,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    dispatch(addNote(noteToAdd));
+    
+    // Form'u sıfırla
+    setNewNote({ title: '', content: '', tags: [] });
+    setModalVisible(false);
+  };
+
+  const handleEditNote = () => {
+    if (!editingNote || newNote.title.trim() === '') {
+      return;
+    }
+
+    const updatedNote = {
+      id: editingNote.id,
+      title: newNote.title.trim(),
+      content: newNote.content.trim(),
+      tags: newNote.tags,
+    };
+
+    dispatch(updateNote(updatedNote));
+    
+    // Form'u sıfırla
+    setNewNote({ title: '', content: '', tags: [] });
+    setEditingNote(null);
+    setModalVisible(false);
+  };
+
+  const openEditModal = (note: Note) => {
+    setEditingNote(note);
+    setNewNote({
+      title: note.title,
+      content: note.content,
+      tags: note.tags || []
+    });
+    setModalVisible(true);
   };
 
   const filteredNotes = notes.filter(note =>
@@ -69,11 +130,22 @@ const NotesScreen = () => {
               {new Date(note.updatedAt).toLocaleDateString('tr-TR')}
             </Text>
           </View>
-          <IconButton
-            icon="delete"
-            size={20}
-            onPress={() => handleDeleteNote(note.id)}
-          />
+          <View style={styles.noteActions}>
+            <Button
+              mode="text"
+              compact
+              onPress={() => openEditModal(note)}
+            >
+              ✏️
+            </Button>
+            <Button
+              mode="text"
+              compact
+              onPress={() => handleDeleteNote(note.id)}
+            >
+              🗑️
+            </Button>
+          </View>
         </View>
       </Card.Content>
     </Card>
@@ -82,7 +154,7 @@ const NotesScreen = () => {
   return (
     <View style={styles.container}>
       <Searchbar
-        placeholder="Notlarda ara..."
+        placeholder="🔍 Notlarda ara..."
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
@@ -117,7 +189,7 @@ const NotesScreen = () => {
       </ScrollView>
       
       <FAB
-        icon="plus"
+        label="➕"
         style={styles.fab}
         onPress={() => setModalVisible(true)}
       />
@@ -129,18 +201,48 @@ const NotesScreen = () => {
           contentContainerStyle={styles.modal}
         >
           <Text variant="titleLarge" style={styles.modalTitle}>
-            Yeni Not
+            {editingNote ? 'Not Düzenle' : 'Yeni Not'}
           </Text>
-          <Text variant="bodyMedium">
-            Not ekleme formu burada olacak
-          </Text>
-          <Button
-            mode="contained"
-            onPress={() => setModalVisible(false)}
-            style={styles.modalButton}
-          >
-            Kapat
-          </Button>
+          
+          <TextInput
+            label="Başlık"
+            value={newNote.title}
+            onChangeText={(text) => setNewNote(prev => ({ ...prev, title: text }))}
+            mode="outlined"
+            style={styles.input}
+          />
+          
+          <TextInput
+            label="İçerik"
+            value={newNote.content}
+            onChangeText={(text) => setNewNote(prev => ({ ...prev, content: text }))}
+            mode="outlined"
+            multiline
+            numberOfLines={4}
+            style={styles.input}
+          />
+
+          <View style={styles.modalButtons}>
+            <Button
+              mode="outlined"
+              onPress={() => {
+                setModalVisible(false);
+                setEditingNote(null);
+                setNewNote({ title: '', content: '', tags: [] });
+              }}
+              style={styles.modalButton}
+            >
+              İptal
+            </Button>
+            <Button
+              mode="contained"
+              onPress={editingNote ? handleEditNote : handleAddNote}
+              style={styles.modalButton}
+              disabled={!newNote.title.trim() || !newNote.content.trim()}
+            >
+              {editingNote ? 'Güncelle' : 'Ekle'}
+            </Button>
+          </View>
         </Modal>
       </Portal>
     </View>
@@ -177,6 +279,10 @@ const styles = StyleSheet.create({
   },
   noteContent: {
     flex: 1,
+  },
+  noteActions: {
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   noteTitle: {
     fontWeight: 'bold',
@@ -231,8 +337,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
   },
-  modalButton: {
+  input: {
+    marginBottom: 12,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 16,
+  },
+  modalButton: {
+    flex: 1,
+    marginHorizontal: 8,
   },
 });
 

@@ -6,9 +6,10 @@ import { RootState } from '../store';
 import { 
   startTimer, 
   pauseTimer, 
-  resetTimer
+  resetTimer,
+  tick,
+  switchPhase
 } from '../store/slices/pomodoroSlice';
-import { format } from 'date-fns';
 
 const PomodoroScreen = () => {
   const dispatch = useDispatch();
@@ -24,6 +25,24 @@ const PomodoroScreen = () => {
   
   const [modalVisible, setModalVisible] = useState(false);
   const [statsModalVisible, setStatsModalVisible] = useState(false);
+
+  // Timer çalıştırma effect'i
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (isRunning && timeRemaining > 0) {
+      interval = setInterval(() => {
+        dispatch(tick()); // tick action'ını dispatch et
+      }, 1000);
+    } else if (isRunning && timeRemaining === 0) {
+      // Timer bitti, faz değiştir
+      dispatch(switchPhase());
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, timeRemaining, dispatch]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -69,12 +88,12 @@ const PomodoroScreen = () => {
   };
 
   // Bugünkü istatistikler
-  const todayDate = format(new Date(), 'yyyy-MM-dd');
+  const todayDate = new Date().toISOString().split('T')[0];
   const todayStats = stats.dailyStats.find(stat => stat.date === todayDate);
   const todayWorkSessions = sessions.filter(session => 
     session.type === 'work' && 
     session.completed &&
-    format(new Date(session.startTime), 'yyyy-MM-dd') === todayDate
+    new Date(session.startTime).toISOString().split('T')[0] === todayDate
   ).length;
 
   return (
@@ -103,18 +122,16 @@ const PomodoroScreen = () => {
               mode="contained"
               onPress={isRunning ? handlePause : handleStart}
               style={[styles.button, styles.primaryButton]}
-              icon={isRunning ? "pause" : "play"}
             >
-              {isRunning ? 'Duraklat' : 'Başlat'}
+              {isRunning ? '⏸️ Duraklat' : '▶️ Başlat'}
             </Button>
             
             <Button
               mode="outlined"
               onPress={handleReset}
               style={styles.button}
-              icon="refresh"
             >
-              Sıfırla
+              🔄 Sıfırla
             </Button>
           </View>
         </Card.Content>
@@ -127,11 +144,12 @@ const PomodoroScreen = () => {
             <Text variant="titleLarge" style={styles.statsTitle}>
               📊 Bugünkü İstatistikler
             </Text>
-            <IconButton
-              icon="chart-line"
-              size={20}
+            <Button
+              mode="text"
               onPress={() => setStatsModalVisible(true)}
-            />
+            >
+              📈 Detaylar
+            </Button>
           </View>
           
           <View style={styles.statsGrid}>
@@ -230,7 +248,7 @@ const PomodoroScreen = () => {
                   {session.type === 'work' ? '🍅 Çalışma' : '☕ Mola'}
                 </Text>
                 <Text variant="bodySmall" style={styles.sessionDate}>
-                  {format(new Date(session.startTime), 'dd MMM, HH:mm')}
+                  {new Date(session.startTime).toLocaleDateString('tr-TR')} {new Date(session.startTime).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}
                 </Text>
               </View>
               <Chip 

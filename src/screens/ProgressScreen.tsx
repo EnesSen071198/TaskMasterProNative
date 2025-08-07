@@ -80,7 +80,7 @@ const ProgressScreen = () => {
           <View style={styles.summaryGrid}>
             <View style={styles.summaryItem}>
               <Text variant="headlineMedium" style={[styles.summaryNumber, {color: '#4CAF50'}]}>
-                {completedTodayTodos.length}
+                ✅ {completedTodayTodos.length}
               </Text>
               <Text variant="bodySmall" style={styles.summaryLabel}>
                 Tamamlanan Görev
@@ -89,7 +89,7 @@ const ProgressScreen = () => {
             
             <View style={styles.summaryItem}>
               <Text variant="headlineMedium" style={[styles.summaryNumber, {color: '#FF9800'}]}>
-                {todaySessions.length}
+                🍅 {todaySessions.length}
               </Text>
               <Text variant="bodySmall" style={styles.summaryLabel}>
                 Pomodoro Oturumu

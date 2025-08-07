@@ -63,7 +63,7 @@ const pomodoroSlice = createSlice({
       // Yeni oturum başlat
       if (!state.isBreak) {
         const newSession: PomodoroSession = {
-          id: crypto.randomUUID(),
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
           startTime: new Date(),
           type: 'work',
           completed: false,

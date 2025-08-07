@@ -11,7 +11,6 @@ import {
   Card,
   FAB,
   Chip,
-  Checkbox,
   IconButton,
   Portal,
   Modal,
@@ -23,7 +22,7 @@ import {
 } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
-import { toggleTodo, addTodo, deleteTodo } from '../store/slices/todosSlice';
+import { toggleTodo, addTodo, deleteTodo, updateTodo } from '../store/slices/todosSlice';
 import { Todo, TaskCategory } from '../types';
 
 const TasksScreen = () => {
@@ -39,6 +38,8 @@ const TasksScreen = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [showStatusPicker, setShowStatusPicker] = useState<string | null>(null);
 
   // İstatistikler
   const completedTodos = todos.filter(todo => todo.completed);
@@ -124,6 +125,42 @@ const TasksScreen = () => {
     );
   };
 
+  const handleStatusChange = (todoId: string, status: Todo['status']) => {
+    dispatch(updateTodo({ id: todoId, status }));
+    setShowStatusPicker(null);
+  };
+
+  const handleEditTodo = (todo: Todo) => {
+    setEditingTodo(todo);
+    setNewTaskTitle(todo.title);
+    setNewTaskDescription(todo.description);
+    setNewTaskPriority(todo.priority);
+    setModalVisible(true);
+  };
+
+  const handleUpdateTodo = () => {
+    if (!editingTodo || newTaskTitle.trim() === '') {
+      Alert.alert('Hata', 'Görev başlığı boş olamaz!');
+      return;
+    }
+
+    const updatedTodo = {
+      id: editingTodo.id,
+      title: newTaskTitle.trim(),
+      description: newTaskDescription.trim(),
+      priority: newTaskPriority,
+    };
+
+    dispatch(updateTodo(updatedTodo));
+    
+    // Form'u sıfırla
+    setNewTaskTitle('');
+    setNewTaskDescription('');
+    setNewTaskPriority('medium');
+    setEditingTodo(null);
+    setModalVisible(false);
+  };
+
   const getMotivationalMessage = () => {
     const rate = completionRate * 100;
     if (rate >= 80) return "🎉 Harika gidiyorsun! Üstün performans!";
@@ -165,10 +202,14 @@ const TasksScreen = () => {
     <Card key={todo.id} style={styles.todoCard}>
       <Card.Content>
         <View style={styles.todoHeader}>
-          <Checkbox
-            status={todo.completed ? 'checked' : 'unchecked'}
+          <Button
+            mode="text"
+            compact
             onPress={() => handleToggleTodo(todo.id)}
-          />
+            style={styles.checkboxButton}
+          >
+            {todo.completed ? '✅' : '⭕'}
+          </Button>
           <View style={styles.todoContent}>
             <Text 
               variant="titleMedium" 
@@ -195,6 +236,7 @@ const TasksScreen = () => {
               <Chip 
                 style={[styles.statusChip, { backgroundColor: getStatusColor(todo.status) }]}
                 textStyle={styles.chipText}
+                onPress={() => setShowStatusPicker(showStatusPicker === todo.id ? null : todo.id)}
               >
                 {todo.status.replace('_', ' ').toUpperCase()}
               </Chip>
@@ -208,12 +250,46 @@ const TasksScreen = () => {
               </Text>
             )}
           </View>
-          <IconButton
-            icon="delete"
-            size={20}
-            onPress={() => handleDeleteTodo(todo.id)}
-          />
+          <View style={styles.todoActions}>
+            <Button
+              mode="text"
+              compact
+              onPress={() => handleEditTodo(todo)}
+            >
+              ✏️
+            </Button>
+            <Button
+              mode="text"
+              compact
+              onPress={() => handleDeleteTodo(todo.id)}
+            >
+              🗑️
+            </Button>
+          </View>
         </View>
+        
+        {/* Durum Seçim Dropdown */}
+        {showStatusPicker === todo.id && (
+          <View style={styles.statusPicker}>
+            {[
+              { key: 'not_started', label: 'Başlanmadı', emoji: '⏸️' },
+              { key: 'in_progress', label: 'Devam Ediyor', emoji: '🔄' },
+              { key: 'completed', label: 'Tamamlandı', emoji: '✅' },
+              { key: 'on_hold', label: 'Beklemede', emoji: '⏳' },
+              { key: 'cancelled', label: 'İptal Edildi', emoji: '❌' },
+            ].map((status) => (
+              <Button
+                key={status.key}
+                mode={todo.status === status.key ? 'contained' : 'outlined'}
+                compact
+                style={styles.statusButton}
+                onPress={() => handleStatusChange(todo.id, status.key as Todo['status'])}
+              >
+                {status.emoji} {status.label}
+              </Button>
+            ))}
+          </View>
+        )}
       </Card.Content>
     </Card>
   );
@@ -280,7 +356,7 @@ const TasksScreen = () => {
 
       {/* Arama ve Filtreler */}
       <Searchbar
-        placeholder="Görevlerde ara..."
+        placeholder="🔍 Görevlerde ara..."
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchbar}
@@ -293,21 +369,21 @@ const TasksScreen = () => {
             onPress={() => setFilterStatus('all')}
             style={styles.filterChip}
           >
-            Tümü ({todos.length})
+            📋 Tümü ({todos.length})
           </Chip>
           <Chip
             selected={filterStatus === 'pending'}
             onPress={() => setFilterStatus('pending')}
             style={styles.filterChip}
           >
-            Bekleyen ({pendingTodos.length})
+            ⏳ Bekleyen ({pendingTodos.length})
           </Chip>
           <Chip
             selected={filterStatus === 'completed'}
             onPress={() => setFilterStatus('completed')}
             style={styles.filterChip}
           >
-            Tamamlanan ({completedTodos.length})
+            ✅ Tamamlanan ({completedTodos.length})
           </Chip>
           
           <Divider style={styles.filterDivider} />
@@ -318,7 +394,7 @@ const TasksScreen = () => {
             style={[styles.filterChip, {backgroundColor: filterPriority === 'high' ? '#F44336' : '#fff'}]}
             textStyle={{color: filterPriority === 'high' ? '#fff' : '#333'}}
           >
-            Yüksek
+            🔴 Yüksek
           </Chip>
           <Chip
             selected={filterPriority === 'medium'}
@@ -326,7 +402,7 @@ const TasksScreen = () => {
             style={[styles.filterChip, {backgroundColor: filterPriority === 'medium' ? '#FF9800' : '#fff'}]}
             textStyle={{color: filterPriority === 'medium' ? '#fff' : '#333'}}
           >
-            Orta
+            🟡 Orta
           </Chip>
           <Chip
             selected={filterPriority === 'low'}
@@ -334,7 +410,7 @@ const TasksScreen = () => {
             style={[styles.filterChip, {backgroundColor: filterPriority === 'low' ? '#4CAF50' : '#fff'}]}
             textStyle={{color: filterPriority === 'low' ? '#fff' : '#333'}}
           >
-            Düşük
+            🟢 Düşük
           </Chip>
         </ScrollView>
       </View>
@@ -372,7 +448,7 @@ const TasksScreen = () => {
       </ScrollView>
       
       <FAB
-        icon="plus"
+        label="➕"
         style={styles.fab}
         onPress={() => setModalVisible(true)}
       />
@@ -384,7 +460,7 @@ const TasksScreen = () => {
           contentContainerStyle={styles.modal}
         >
           <Text variant="titleLarge" style={styles.modalTitle}>
-            Yeni Görev Ekle
+            {editingTodo ? 'Görevi Düzenle' : 'Yeni Görev Ekle'}
           </Text>
           
           <TextInput
@@ -439,10 +515,10 @@ const TasksScreen = () => {
             </Button>
             <Button
               mode="contained"
-              onPress={handleAddTodo}
+              onPress={editingTodo ? handleUpdateTodo : handleAddTodo}
               style={styles.modalButton}
             >
-              Ekle
+              {editingTodo ? 'Güncelle' : 'Ekle'}
             </Button>
           </View>
         </Modal>
@@ -646,6 +722,26 @@ const styles = StyleSheet.create({
   priorityButton: {
     flex: 1,
     marginHorizontal: 4,
+  },
+  todoActions: {
+    flexDirection: 'row',
+  },
+  checkboxButton: {
+    minWidth: 40,
+    marginRight: 8,
+  },
+  statusPicker: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+  },
+  statusButton: {
+    minWidth: 100,
+    marginBottom: 4,
   },
 });
 
